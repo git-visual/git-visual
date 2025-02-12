@@ -8,15 +8,29 @@ import { cjsInterop } from "vite-plugin-cjs-interop"
 export default defineConfig({
   build: {
     rollupOptions: {
-      external: ["duckdb-async"]
+      external: ["@duckdb/node-api"]
     }
   },
   ssr: {
-    external: ["duckdb-async"]
+    external: [
+      "@duckdb/node-api",
+      "@duckdb/node-bindings-linux-arm64",
+      "@duckdb/node-bindings-linux-x64",
+      "@duckdb/node-bindings-win32-x64",
+      "@duckdb/node-bindings-darwin-x64",
+      "@duckdb/node-bindings-darwin-arm64",
+    ]
   },
   optimizeDeps: {
     entries: [],
-    exclude: ["@mapbox/node-pre-gyp", "aws-sdk", "nock", "mock-aws-s3"]
+    exclude: [
+      "@duckdb/node-api",
+      "@duckdb/node-bindings-linux-arm64",
+      "@duckdb/node-bindings-linux-x64",
+      "@duckdb/node-bindings-win32-x64",
+      "@duckdb/node-bindings-darwin-x64",
+      "@duckdb/node-bindings-darwin-arm64",
+    ]
   },
   plugins: [
     tailwindcss(),
