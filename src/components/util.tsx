@@ -41,7 +41,7 @@ export const LegendDot = ({
   if (!authorColorToChange)
     return (
       <div
-        className={`aspect-square h-4 w-4 rounded-full shadow-sm shadow-black ${className}`}
+        className={`aspect-square h-4 w-4 rounded-full shadow-xs shadow-black ${className}`}
         style={{ ...style, backgroundColor: dotColor }}
       />
     )
@@ -68,7 +68,7 @@ export const LegendDot = ({
           arrowSize={10}
           arrowColor="white"
         >
-          <div className="card z-20 max-w-lg bg-gray-100/50 pr-10 backdrop-blur dark:bg-gray-800/40">
+          <div className="card z-20 max-w-lg bg-gray-100/50 pr-10 backdrop-blur-sm dark:bg-gray-800/40">
             <HexColorPicker color={color} onChange={setColor} />
             <button className="btn" onClick={() => updateColor(authorColorToChange, color)}>
               Set color
@@ -85,7 +85,7 @@ export const LegendDot = ({
       onClickOutside={() => setIsPopoverOpen(false)}
     >
       <div
-        className={`aspect-square h-4 w-4 rounded-full shadow-sm shadow-black ${className} cursor-pointer`}
+        className={`aspect-square h-4 w-4 rounded-full shadow-xs shadow-black ${className} cursor-pointer`}
         style={{ ...style, backgroundColor: dotColor }}
         onClick={() => setIsPopoverOpen(!isPopoverOpen)}
       />

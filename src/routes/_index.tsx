@@ -195,11 +195,11 @@ function RepositoryList({ children }: { children: ReactNode[] }) {
       </p>
     </>
   ) : (
-    <div className="card row-start-auto grid w-full grid-flow-row grid-cols-[1fr,1fr,1fr,auto] flex-wrap items-center gap-2">
+    <div className="card row-start-auto grid w-full grid-flow-row grid-cols-[1fr_1fr_1fr_auto] flex-wrap items-center gap-2">
       {/* <h2 className="card__title truncate break-all" title="Clone repository">
         Clone repository
       </h2>
-      <span className="select-none rounded-full bg-gradient-to-r  from-blue-500 to-blue-600 px-2 py-1.5 text-center text-xs font-bold uppercase leading-none tracking-widest text-white/90">
+      <span className="select-none rounded-full bg-linear-to-r  from-blue-500 to-blue-600 px-2 py-1.5 text-center text-xs font-bold uppercase leading-none tracking-widest text-white/90">
         Coming soon
       </span>
       <input type="text" className="input input--hover-border" placeholder="git@github.com/owner/repo.git" />
@@ -227,11 +227,11 @@ function RepositoryEntry({ repo, analyzedRepos }: { repo: Repository; analyzedRe
     <Fragment key={repo.name}>
       <h2 className="card__title flex justify-start gap-2" title={repo.path}>
         {!isError ? (
-          <Icon path={mdiGit} size={1} className="inline-block flex-shrink-0" title="Git repository" />
+          <Icon path={mdiGit} size={1} className="inline-block shrink-0" title="Git repository" />
         ) : isFolder ? (
-          <Icon path={mdiFolder} size={1} className="inline-block flex-shrink-0" title="Folder" />
+          <Icon path={mdiFolder} size={1} className="inline-block shrink-0" title="Folder" />
         ) : (
-          <Icon path={mdiTruckAlert} size={1} className="inline-block flex-shrink-0" title="Error" />
+          <Icon path={mdiTruckAlert} size={1} className="inline-block shrink-0" title="Error" />
         )}
         <span className="truncate text-left">{repo.name}</span>
       </h2>
@@ -241,10 +241,10 @@ function RepositoryEntry({ repo, analyzedRepos }: { repo: Repository; analyzedRe
         ) : (
           <div
             className={cn("aspect-square h-2 rounded-full", {
-              "bg-gradient-to-bl from-green-500 to-green-600": repo.status === "Success" && isAnalyzed,
-              "bg-gradient-to-bl from-red-500 to-red-600": repo.status === "Error",
-              "animate-pulse bg-gradient-to-bl from-yellow-500 to-yellow-600": repo.status === "Loading",
-              "bg-gradient-to-bl from-gray-500 to-gray-400": repo.status === "Success" && !isAnalyzed
+              "bg-linear-to-bl from-green-500 to-green-600": repo.status === "Success" && isAnalyzed,
+              "bg-linear-to-bl from-red-500 to-red-600": repo.status === "Error",
+              "animate-pulse bg-linear-to-bl from-yellow-500 to-yellow-600": repo.status === "Loading",
+              "bg-linear-to-bl from-gray-500 to-gray-400": repo.status === "Success" && !isAnalyzed
             })}
           />
         )}
@@ -307,7 +307,7 @@ function RepositoryEntry({ repo, analyzedRepos }: { repo: Repository; analyzedRe
           View
         </Link>
       )}
-      <hr className="col-span-full last:hidden" />
+      <hr className="col-span-full last:hidden opacity-50" />
     </Fragment>
   )
 }

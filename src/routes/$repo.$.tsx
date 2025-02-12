@@ -446,7 +446,7 @@ export default function Repo() {
                 ) : null}
               </aside>
 
-              <main className="grid h-full min-w-[100px] grid-rows-[auto,1fr] gap-2 overflow-y-hidden p-2">
+              <main className="grid h-full min-w-[100px] grid-rows-[auto_1fr] gap-2 overflow-y-hidden p-2">
                 <header className="grid grid-flow-col items-center justify-between gap-2">
                   <Breadcrumb />
                   <FullscreenButton setIsFullscreen={setIsFullscreen} isFullscreen={isFullscreen} />
@@ -485,7 +485,7 @@ export default function Repo() {
                     <DetailsCard
                       showUnionAuthorsModal={showUnionAuthorsModal}
                       className={clsx({
-                        "absolute bottom-0 right-2 max-h-screen -translate-x-full overflow-y-auto shadow shadow-black/50":
+                        "absolute bottom-0 right-2 max-h-screen -translate-x-full overflow-y-auto shadow-sm shadow-black/50":
                           isFullscreen
                       })}
                     />

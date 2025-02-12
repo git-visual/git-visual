@@ -31,7 +31,7 @@ const UpdateNotifier = memo(function UpdateNotifier() {
           arrowColor="white"
         >
           {isExperimental ? (
-            <div className="card max-w-lg bg-gray-100/50 pr-10 backdrop-blur dark:bg-gray-800/40">
+            <div className="card max-w-lg bg-gray-100/50 pr-10 backdrop-blur-sm dark:bg-gray-800/40">
               <p>You are using an experimental build of Git Truck</p>
               <p className="card-p">Currently installed: {gitTruckInfo.version}</p>
               <p className="card-p">
@@ -40,7 +40,7 @@ const UpdateNotifier = memo(function UpdateNotifier() {
               </p>
             </div>
           ) : (
-            <div className="card max-w-lg bg-gray-100/50 pr-10 backdrop-blur dark:bg-gray-800/40">
+            <div className="card max-w-lg bg-gray-100/50 pr-10 backdrop-blur-sm dark:bg-gray-800/40">
               <p>Update available: {gitTruckInfo.latestVersion}</p>
               <p className="card-p">Currently installed: {gitTruckInfo.version}</p>
               <p className="card-p">
@@ -109,7 +109,7 @@ export const GlobalInfo = memo(function GlobalInfo() {
               <Icon path={mdiInformation} size="1.5em" />
             </button>
             <div
-              className={clsx("card absolute left-0 top-0 z-10 h-max w-max shadow transition-opacity", {
+              className={clsx("card absolute left-0 top-0 z-10 h-max w-max shadow-sm transition-opacity", {
                 "hidden opacity-0": !analysisDetailsVisible
               })}
             >
