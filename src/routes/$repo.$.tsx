@@ -434,7 +434,7 @@ export default function Repo() {
                       type="button"
                       onClick={() => setIsLeftPanelCollapse(!isLeftPanelCollapse)}
                       className={clsx(
-                        "btn btn--primary absolute left-0 top-[50vh] flex h-6 w-6 cursor-pointer items-center justify-center rounded-full p-0",
+                        "btn btn--primary absolute top-[50vh] left-0 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full p-0",
                         {
                           "left-arrow-space": !isLeftPanelCollapse
                         }
@@ -474,7 +474,7 @@ export default function Repo() {
                     <button
                       type="button"
                       onClick={() => setIsRightPanelCollapse(!isRightPanelCollapse)}
-                      className="btn btn--primary absolute right-0 top-[50vh] flex h-6 w-6 cursor-pointer items-center justify-center rounded-full p-0"
+                      className="btn btn--primary absolute top-[50vh] right-0 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full p-0"
                     >
                       <Icon path={isRightPanelCollapse ? mdiChevronLeft : mdiChevronRight} size={1} />
                     </button>
@@ -485,7 +485,7 @@ export default function Repo() {
                     <DetailsCard
                       showUnionAuthorsModal={showUnionAuthorsModal}
                       className={clsx({
-                        "absolute bottom-0 right-2 max-h-screen -translate-x-full overflow-y-auto shadow-sm shadow-black/50":
+                        "absolute right-2 bottom-0 max-h-screen -translate-x-full overflow-y-auto shadow-sm shadow-black/50":
                           isFullscreen
                       })}
                     />
@@ -543,7 +543,7 @@ function ChartWrapper({
     <div className="card grid overflow-y-hidden p-2" ref={chartWrapperRef}>
       <Chart setHoveredObject={setHoveredObject} />
       {createPortal(
-        <Tooltip hoveredObject={hoveredObject} x={mouse.docX} y={mouse.docY} w={window.innerWidth} />,
+        <Tooltip hoveredObject={hoveredObject} x={mouse.x} y={mouse.y} w={window.innerWidth} />,
         document.body
       )}
     </div>

@@ -8,7 +8,7 @@ import anitruck from "~/assets/truck.gif"
 import { Popover, ArrowContainer } from "react-tiny-popover"
 import { HexColorPicker } from "react-colorful"
 import { useData } from "~/contexts/DataContext"
-import { useSubmit } from "react-router";
+import { useSubmit } from "react-router"
 import { getPathFromRepoAndHead } from "~/util"
 
 export const CloseButton = ({
@@ -18,7 +18,7 @@ export const CloseButton = ({
 }: HTMLAttributes<HTMLButtonElement> & { absolute?: boolean }) => (
   <button
     className={clsx(className, "inline-grid text-lg leading-none hover:opacity-80", {
-      "absolute right-2 top-2 z-10": absolute
+      "absolute top-2 right-2 z-10": absolute
     })}
     title="Close"
     {...props}
