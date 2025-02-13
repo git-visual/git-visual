@@ -1,4 +1,4 @@
-import { useDeferredValue } from "react"
+import { useDeferredValue, type JSX } from "react"
 import type { GitObject } from "~/analyzer/model"
 import { useMetrics } from "../../contexts/MetricContext"
 import { useOptions } from "../../contexts/OptionsContext"
