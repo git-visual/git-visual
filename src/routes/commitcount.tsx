@@ -1,6 +1,6 @@
 import invariant from "tiny-invariant"
 import InstanceManager from "~/analyzer/InstanceManager.server"
-import { Route } from "./+types/commitcount";
+import type { Route } from "./+types/commitcount"
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
   const url = new URL(request.url)

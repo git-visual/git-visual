@@ -1,7 +1,7 @@
 import { sleep } from "~/analyzer/util.server"
 import InstanceManager from "~/analyzer/InstanceManager.server"
-import { ProgressData } from "~/components/LoadingIndicator"
-import { Route } from "./+types/progress"
+import type { ProgressData } from "~/components/LoadingIndicator"
+import type { Route } from "./+types/progress"
 
 const defaultResponse: ProgressData = { progress: 0, analyzationStatus: "Starting" }
 

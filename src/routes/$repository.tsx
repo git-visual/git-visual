@@ -4,7 +4,7 @@ import { join } from "node:path"
 import invariant from "tiny-invariant"
 import { getArgsWithDefaults } from "~/analyzer/args.server"
 import { GitCaller } from "~/analyzer/git-caller.server"
-import { Route } from "./+types/$repository"
+import type { Route } from "./+types/$repository"
 
 /**
  * Redirect to the repository's default branch

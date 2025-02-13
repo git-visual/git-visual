@@ -17,7 +17,7 @@ import { mdiArrowUp, mdiDeleteForever, mdiFolder, mdiGit, mdiTruckAlert } from "
 import InstanceManager from "~/analyzer/InstanceManager.server"
 import { existsSync } from "node:fs"
 import { log } from "~/analyzer/log.server"
-import { Route } from "./+types/_index"
+import type { Route } from "./+types/_index"
 
 export const loader = async () => {
   const queryPath = null
@@ -254,7 +254,7 @@ function RepositoryEntry({ repo, analyzedRepos }: { repo: Repository; analyzedRe
           <span
             data-testid={`status-${repo.name}`}
             className={cn(
-              "w-full min-w-max select-none rounded-full bg-transparent px-2 py-1.5 text-xs font-bold uppercase leading-none tracking-widest text-inherit transition-colors duration-200"
+              "w-full min-w-max rounded-full bg-transparent px-2 py-1.5 text-xs leading-none font-bold tracking-widest text-inherit uppercase transition-colors duration-200 select-none"
             )}
           >
             {repo.status === "Success" ? (isAnalyzed ? "Analyzed" : "Not analyzed") : repo.status}
@@ -307,7 +307,7 @@ function RepositoryEntry({ repo, analyzedRepos }: { repo: Repository; analyzedRe
           View
         </Link>
       )}
-      <hr className="col-span-full last:hidden opacity-50" />
+      <hr className="col-span-full opacity-50 last:hidden" />
     </Fragment>
   )
 }

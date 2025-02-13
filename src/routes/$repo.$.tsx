@@ -33,7 +33,7 @@ import { UnionAuthorsModal } from "~/components/UnionAuthorsModal"
 import { Code } from "~/components/util"
 
 import { cn } from "~/styling"
-import { Route } from "./+types/$repo.$"
+import type { Route } from "./+types/$repo.$"
 
 export interface RepoData {
   repo: Repository
