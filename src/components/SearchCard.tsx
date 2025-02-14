@@ -7,7 +7,7 @@ import { useData } from "~/contexts/DataContext"
 import { usePath } from "~/contexts/PathContext"
 import { useClickedObject } from "~/contexts/ClickedContext"
 import { allExceptLast, getSeparator } from "~/util"
-import { Icon } from "@mdi/react"
+import Icon from "@mdi/react"
 import { mdiFolder, mdiFileOutline, mdiMagnify } from "@mdi/js"
 
 function findSearchResults(tree: GitTreeObject, searchString: string): SearchResults {

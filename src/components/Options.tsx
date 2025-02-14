@@ -1,24 +1,24 @@
+import Icon from "@mdi/react"
+import { memo } from "react"
+import type { ChartType } from "../contexts/OptionsContext"
+import { Chart, useOptions } from "../contexts/OptionsContext"
 import type { MetricType } from "../metrics/metrics"
 import { Metric } from "../metrics/metrics"
 import { EnumSelect } from "./EnumSelect"
-import type { ChartType } from "../contexts/OptionsContext"
-import { Chart, useOptions } from "../contexts/OptionsContext"
-import { Icon } from "@mdi/react"
-import { memo } from "react"
 
 import {
   mdiChartBubble,
   mdiChartTree,
-  mdiPodiumGold,
   mdiFileCodeOutline,
-  mdiUpdate,
-  mdiResize,
-  mdiSourceCommit,
-  mdiScaleBalance,
-  mdiPalette,
   mdiImageSizeSelectSmall,
+  mdiPalette,
+  mdiPlusMinusVariant,
+  mdiPodiumGold,
   mdiPuzzle,
-  mdiPlusMinusVariant
+  mdiResize,
+  mdiScaleBalance,
+  mdiSourceCommit,
+  mdiUpdate
 } from "@mdi/js"
 import type { SizeMetricType } from "~/metrics/sizeMetric"
 import { SizeMetric } from "~/metrics/sizeMetric"

@@ -11,15 +11,15 @@ module.exports = {
     ecmaVersion: "latest",
     sourceType: "module",
     ecmaFeatures: {
-      jsx: true
-    }
+      jsx: true,
+    },
   },
   env: {
     browser: true,
     commonjs: true,
-    node: true,
-    es6: true
+    es6: true,
   },
+  ignorePatterns: ["!**/.server", "!**/.client"],
 
   // Base config
   extends: ["eslint:recommended"],
@@ -33,21 +33,21 @@ module.exports = {
         "plugin:react/recommended",
         "plugin:react/jsx-runtime",
         "plugin:react-hooks/recommended",
-        "plugin:jsx-a11y/recommended"
+        "plugin:jsx-a11y/recommended",
       ],
       settings: {
         react: {
-          version: "detect"
+          version: "detect",
         },
         formComponents: ["Form"],
         linkComponents: [
           { name: "Link", linkAttribute: "to" },
-          { name: "NavLink", linkAttribute: "to" }
+          { name: "NavLink", linkAttribute: "to" },
         ],
         "import/resolver": {
-          typescript: {}
-        }
-      }
+          typescript: {},
+        },
+      },
     },
 
     // Typescript
@@ -59,22 +59,26 @@ module.exports = {
         "import/internal-regex": "^~/",
         "import/resolver": {
           node: {
-            extensions: [".ts", ".tsx"]
+            extensions: [".ts", ".tsx"],
           },
           typescript: {
-            alwaysTryTypes: true
-          }
-        }
+            alwaysTryTypes: true,
+          },
+        },
       },
-      extends: ["plugin:@typescript-eslint/recommended", "plugin:import/recommended", "plugin:import/typescript"]
+      extends: [
+        "plugin:@typescript-eslint/recommended",
+        "plugin:import/recommended",
+        "plugin:import/typescript",
+      ],
     },
 
     // Node
     {
-      files: [".eslintrc.js"],
+      files: [".eslintrc.cjs", "scripts/*.{js,ts}"],
       env: {
-        node: true
-      }
-    }
-  ]
-}
+        node: true,
+      },
+    },
+  ],
+};

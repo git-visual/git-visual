@@ -17,7 +17,7 @@ function AccordionItem({
   const afterStyle =
     "after:content-[''] after:shrink-0 after:w-[14px] after:h-[14px] after:ml-auto after:transition-[transform] after:duration-[200ms] after:ease-out after:bg-[length:14px_14px] after:bg-no-repeat after:bg-arrow"
   return (
-    <li className="border-0 ">
+    <li className="border-0">
       <h2 className="m-0 w-full hover:opacity-70">
         <div
           className={clsx("b-0 flex w-full cursor-pointer items-center" + afterStyle, {

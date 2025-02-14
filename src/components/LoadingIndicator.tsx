@@ -1,4 +1,4 @@
-import { useFetcher, useLocation } from "@remix-run/react"
+import { useFetcher, useLocation } from "react-router";
 import clsx from "clsx"
 import { useEffect, useMemo } from "react"
 import type { AnalyzationStatus } from "~/analyzer/ServerInstance.server"
@@ -38,7 +38,7 @@ export function LoadingIndicator({
 
   return (
     <div className={clsx("grid h-full w-full place-items-center", className)}>
-      <div className={cn("flex  flex-col px-2 py-2", { "animate-hide-initially opacity-0": hideInitially })}>
+      <div className={cn("flex flex-col px-2 py-2", { "animate-hide-initially opacity-0": hideInitially })}>
         <p className="text-center text-3xl font-bold opacity-70">{loadingText ?? progressText}</p>
         <img src={anitruck} alt={"🚛"} className="w-full min-w-0 max-w-sm self-center" />
       </div>

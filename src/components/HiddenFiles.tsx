@@ -1,10 +1,9 @@
-import { useBoolean } from "react-use"
 import { useData } from "~/contexts/DataContext"
-import { Form, useLocation, useNavigation } from "@remix-run/react"
+import { Form, useLocation, useNavigation } from "react-router";
 import { mdiEyeOff, mdiEye } from "@mdi/js"
 import { ChevronButton } from "./ChevronButton"
-import { Icon } from "@mdi/react"
-import { memo, useId } from "react"
+import Icon from "@mdi/react"
+import { memo, useId, useState } from "react"
 
 function hiddenFileFormat(ignored: string) {
   if (!ignored.includes("/")) return ignored
@@ -14,7 +13,7 @@ function hiddenFileFormat(ignored: string) {
 
 export const HiddenFiles = memo(function HiddenFiles() {
   const location = useLocation()
-  const [expanded, setExpanded] = useBoolean(false)
+  const [expanded, setExpanded] = useState(false)
   const navigationState = useNavigation()
   const { databaseInfo } = useData()
   const expandHiddenFilesButtonId = useId()

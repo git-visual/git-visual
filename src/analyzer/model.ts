@@ -29,7 +29,7 @@ export type Repository = {
     }
   | {
       name: string
-      fullPath: string
+      // fullPath: string // TODO: Implement browsing, requires new routing
       status: "Loading"
     }
   | {

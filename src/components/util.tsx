@@ -1,14 +1,14 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import { useState, useTransition, type HTMLAttributes } from "react"
-import { Icon } from "@mdi/react"
+import Icon from "@mdi/react"
 import { mdiCheckboxOutline, mdiCheckboxBlankOutline, mdiMenuUp, mdiClose } from "@mdi/js"
 import clsx from "clsx"
 import anitruck from "~/assets/truck.gif"
 import { Popover, ArrowContainer } from "react-tiny-popover"
 import { HexColorPicker } from "react-colorful"
 import { useData } from "~/contexts/DataContext"
-import { useSubmit } from "@remix-run/react"
+import { useSubmit } from "react-router"
 import { getPathFromRepoAndHead } from "~/util"
 
 export const CloseButton = ({
@@ -18,7 +18,7 @@ export const CloseButton = ({
 }: HTMLAttributes<HTMLButtonElement> & { absolute?: boolean }) => (
   <button
     className={clsx(className, "inline-grid text-lg leading-none hover:opacity-80", {
-      "absolute right-2 top-2 z-10": absolute
+      "absolute top-2 right-2 z-10": absolute
     })}
     title="Close"
     {...props}
@@ -41,7 +41,7 @@ export const LegendDot = ({
   if (!authorColorToChange)
     return (
       <div
-        className={`aspect-square h-4 w-4 rounded-full shadow-sm shadow-black ${className}`}
+        className={`aspect-square h-4 w-4 rounded-full shadow-xs shadow-black ${className}`}
         style={{ ...style, backgroundColor: dotColor }}
       />
     )
@@ -68,7 +68,7 @@ export const LegendDot = ({
           arrowSize={10}
           arrowColor="white"
         >
-          <div className="card z-20 max-w-lg bg-gray-100/50 pr-10 backdrop-blur dark:bg-gray-800/40">
+          <div className="card z-20 max-w-lg bg-gray-100/50 pr-10 backdrop-blur-sm dark:bg-gray-800/40">
             <HexColorPicker color={color} onChange={setColor} />
             <button className="btn" onClick={() => updateColor(authorColorToChange, color)}>
               Set color
@@ -85,7 +85,7 @@ export const LegendDot = ({
       onClickOutside={() => setIsPopoverOpen(false)}
     >
       <div
-        className={`aspect-square h-4 w-4 rounded-full shadow-sm shadow-black ${className} cursor-pointer`}
+        className={`aspect-square h-4 w-4 rounded-full shadow-xs shadow-black ${className} cursor-pointer`}
         style={{ ...style, backgroundColor: dotColor }}
         onClick={() => setIsPopoverOpen(!isPopoverOpen)}
       />

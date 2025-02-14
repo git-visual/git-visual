@@ -1,7 +1,7 @@
 import { type ClassValue, clsx } from "clsx"
 import type { Dispatch, ReactNode, SetStateAction } from "react"
 import { createContext, useContext } from "react"
-import { useLocalStorage } from "react-use"
+import { useLocalStorage } from "~/hooks"
 import { twMerge } from "tailwind-merge"
 
 export const cn = (...args: ClassValue[]) => twMerge(clsx(args))

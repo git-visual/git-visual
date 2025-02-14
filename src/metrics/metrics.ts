@@ -1,17 +1,17 @@
+import sha1 from "sha1"
+import uniqolor from "uniqolor"
 import type { GitBlobObject, GitTreeObject } from "~/analyzer/model"
+import type { GradLegendData } from "~/components/legend/GradiantLegend"
+import type { PointInfo, PointLegendData } from "~/components/legend/PointLegend"
+import type { SegmentLegendData } from "~/components/legend/SegmentLegend"
+import { noEntryColor } from "~/const"
+import type { RepoData } from "~/routes/$repo.$"
 import type { LegendType } from "../components/legend/Legend"
 import { setExtensionColor } from "./fileExtension"
-import { CommitAmountTranslater } from "./mostCommits"
 import { getLastChangedIndex, lastChangedGroupings } from "./lastChanged"
-import { setDominantAuthorColor } from "./topContributer"
-import type { GradLegendData } from "~/components/legend/GradiantLegend"
-import type { SegmentLegendData } from "~/components/legend/SegmentLegend"
-import type { PointInfo, PointLegendData } from "~/components/legend/PointLegend"
-import uniqolor from "uniqolor"
-import type { RepoData } from "~/routes/$repo.$"
-import { noEntryColor } from "~/const"
-import { createHash } from "node:crypto"
+import { CommitAmountTranslater } from "./mostCommits"
 import { ContribAmountTranslater } from "./mostContribs"
+import { setDominantAuthorColor } from "./topContributer"
 
 export type MetricsData = [Map<MetricType, MetricCache>, Map<string, string>]
 
@@ -90,9 +90,7 @@ export function generateAuthorColors(
       result[author] = existing
       continue
     }
-    const hash = createHash("sha1")
-    hash.update(author + seed)
-    const hashed = hash.digest("hex")
+    const hashed = sha1(author + seed)
     const color = uniqolor(hashed).color as `#${string}`
     result[author] = color
   }

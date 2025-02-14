@@ -1,14 +1,11 @@
 import { sleep } from "~/analyzer/util.server"
 import InstanceManager from "~/analyzer/InstanceManager.server"
-import type { LoaderFunctionArgs } from "@remix-run/node"
-import type { AnalyzationStatus } from "~/analyzer/ServerInstance.server"
-import { ProgressData } from "~/components/LoadingIndicator"
+import type { ProgressData } from "~/components/LoadingIndicator"
+import type { Route } from "./+types/progress"
 
-type ProgressResponse = { progress: number; analyzationStatus: AnalyzationStatus }
+const defaultResponse: ProgressData = { progress: 0, analyzationStatus: "Starting" }
 
-const defaultResponse: ProgressResponse = { progress: 0, analyzationStatus: "Starting" }
-
-export const loader = async ({ request }: LoaderFunctionArgs): Promise<ProgressResponse> => {
+export const loader = async ({ request }: Route.LoaderArgs): Promise<ProgressData> => {
   const url = new URL(request.url)
   const branch = url.searchParams.get("branch")
   const repo = url.searchParams.get("repo")

@@ -1,39 +1,39 @@
+import { mdiChevronLeft, mdiChevronRight, mdiFullscreen, mdiFullscreenExit } from "@mdi/js"
+import Icon from "@mdi/react"
+import { redirect, Await, Link, isRouteErrorResponse, useLoaderData, useRouteError } from "react-router"
+import clsx from "clsx"
 import { resolve } from "path"
+import randomstring from "randomstring"
 import type { Dispatch, SetStateAction } from "react"
-import { memo, Suspense, useEffect, useMemo, useRef, useState } from "react"
-import { useBoolean, useMouse } from "react-use"
-import { ActionFunction, LoaderFunctionArgs, defer, redirect } from "@remix-run/node"
-import { Link, isRouteErrorResponse, useRouteError, useLoaderData, Await, Params } from "@remix-run/react"
+import { Suspense, memo, useEffect, useMemo, useRef, useState } from "react"
+import { Online } from "react-detect-offline"
+import { createPortal } from "react-dom"
+import { useMouse, useClient } from "~/hooks"
 import { getArgs } from "~/analyzer/args.server"
 import { GitCaller } from "~/analyzer/git-caller.server"
+import InstanceManager from "~/analyzer/InstanceManager.server"
 import type { CompletedResult, GitObject, GitTreeObject, Repository } from "~/analyzer/model"
-import { getGitTruckInfo, openFile } from "~/analyzer/util.server"
+import { shouldUpdate } from "~/analyzer/RefreshPolicy"
+import { openFile } from "~/analyzer/util.server"
+import BarChart from "~/components/BarChart"
+import { Breadcrumb } from "~/components/Breadcrumb"
+import { Chart } from "~/components/Chart"
 import { DetailsCard } from "~/components/DetailsCard"
+import { FeedbackCard } from "~/components/FeedbackCard"
 import { GlobalInfo } from "~/components/GlobalInfo"
 import { HiddenFiles } from "~/components/HiddenFiles"
 import { Legend } from "~/components/legend/Legend"
+import { LoadingIndicator } from "~/components/LoadingIndicator"
 import { Options } from "~/components/Options"
 import { Providers } from "~/components/Providers"
 import { SearchCard } from "~/components/SearchCard"
+import TimeSlider from "~/components/TimeSlider"
+import { Tooltip } from "~/components/Tooltip"
 import { UnionAuthorsModal } from "~/components/UnionAuthorsModal"
 import { Code } from "~/components/util"
-import { mdiFullscreen, mdiFullscreenExit, mdiChevronRight, mdiChevronLeft } from "@mdi/js"
-import { Breadcrumb } from "~/components/Breadcrumb"
-import { FeedbackCard } from "~/components/FeedbackCard"
-import { Chart } from "~/components/Chart"
-import { Icon } from "@mdi/react"
-import { useClient } from "~/hooks"
-import clsx from "clsx"
-import { Tooltip } from "~/components/Tooltip"
-import { createPortal } from "react-dom"
-import randomstring from "randomstring"
-import InstanceManager from "~/analyzer/InstanceManager.server"
-import TimeSlider from "~/components/TimeSlider"
-import { Online } from "react-detect-offline"
+
 import { cn } from "~/styling"
-import BarChart from "~/components/BarChart"
-import { shouldUpdate } from "~/analyzer/RefreshPolicy"
-import { LoadingIndicator } from "~/components/LoadingIndicator"
+import type { Route } from "./+types/$repo.$"
 
 export interface RepoData {
   repo: Repository
@@ -75,15 +75,15 @@ export interface DatabaseInfo {
   commitCount: number
 }
 
-export const loader = async ({ params }: LoaderFunctionArgs) => {
+export const loader = async ({ params, context }: Route.LoaderArgs) => {
   if (!params["repo"] || !params["*"]) {
     return redirect("/")
   }
-  const dataPromise = analyze(params)
-  return defer({ dataPromise })
+  const dataPromise = analyze(params, context)
+  return { dataPromise }
 }
 
-export const action: ActionFunction = async ({ request, params }) => {
+export const action = async ({ request, params }: Route.ActionArgs) => {
   if (!params["repo"]) {
     throw Error("This can never happen, since this route is only called if a repo exists in the URL")
   }
@@ -222,7 +222,7 @@ export const ErrorBoundary = () => {
   )
 }
 
-async function analyze(params: Params) {
+async function analyze(params: Route.LoaderArgs["params"], context: Route.LoaderArgs["context"]) {
   const args = await getArgs()
   const path = resolve(args.path, params["repo"] ?? "")
   const branch = params["*"]
@@ -357,7 +357,7 @@ async function analyze(params: Params) {
 
   const fullData = {
     repo,
-    gitTruckInfo: await getGitTruckInfo(),
+    gitTruckInfo: context,
     databaseInfo: databaseInfo
   } as RepoData
 
@@ -370,7 +370,7 @@ export default function Repo() {
   const [isLeftPanelCollapse, setIsLeftPanelCollapse] = useState<boolean>(false)
   const [isRightPanelCollapse, setIsRightPanelCollapse] = useState<boolean>(false)
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false)
-  const [unionAuthorsModalOpen, setUnionAuthorsModalOpen] = useBoolean(false)
+  const [unionAuthorsModalOpen, setUnionAuthorsModalOpen] = useState(false)
   const [hoveredObject, setHoveredObject] = useState<GitObject | null>(null)
   const showUnionAuthorsModal = (): void => setUnionAuthorsModalOpen(true)
 
@@ -409,8 +409,8 @@ export default function Repo() {
       }
     >
       <Await resolve={dataPromise}>
-        {(dataPromise) => (
-          <Providers data={dataPromise as RepoData}>
+        {(data) => (
+          <Providers data={data as RepoData}>
             <div className={cn("app-container", containerClass)}>
               <aside
                 className={clsx("grid auto-rows-min items-start gap-2 p-2 pr-0", {
@@ -434,7 +434,7 @@ export default function Repo() {
                       type="button"
                       onClick={() => setIsLeftPanelCollapse(!isLeftPanelCollapse)}
                       className={clsx(
-                        "btn btn--primary absolute left-0 top-[50vh] flex h-6 w-6 cursor-pointer items-center justify-center rounded-full p-0",
+                        "btn btn--primary absolute top-[50vh] left-0 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full p-0",
                         {
                           "left-arrow-space": !isLeftPanelCollapse
                         }
@@ -446,7 +446,7 @@ export default function Repo() {
                 ) : null}
               </aside>
 
-              <main className="grid h-full min-w-[100px] grid-rows-[auto,1fr] gap-2 overflow-y-hidden p-2">
+              <main className="grid h-full min-w-[100px] grid-rows-[auto_1fr] gap-2 overflow-y-hidden p-2">
                 <header className="grid grid-flow-col items-center justify-between gap-2">
                   <Breadcrumb />
                   <FullscreenButton setIsFullscreen={setIsFullscreen} isFullscreen={isFullscreen} />
@@ -474,7 +474,7 @@ export default function Repo() {
                     <button
                       type="button"
                       onClick={() => setIsRightPanelCollapse(!isRightPanelCollapse)}
-                      className="btn btn--primary absolute right-0 top-[50vh] flex h-6 w-6 cursor-pointer items-center justify-center rounded-full p-0"
+                      className="btn btn--primary absolute top-[50vh] right-0 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full p-0"
                     >
                       <Icon path={isRightPanelCollapse ? mdiChevronLeft : mdiChevronRight} size={1} />
                     </button>
@@ -485,11 +485,11 @@ export default function Repo() {
                     <DetailsCard
                       showUnionAuthorsModal={showUnionAuthorsModal}
                       className={clsx({
-                        "absolute bottom-0 right-2 max-h-screen -translate-x-full overflow-y-auto shadow shadow-black/50":
+                        "absolute right-2 bottom-0 max-h-screen -translate-x-full overflow-y-auto shadow-sm shadow-black/50":
                           isFullscreen
                       })}
                     />
-                    {dataPromise.databaseInfo.hiddenFiles.length > 0 ? <HiddenFiles /> : null}
+                    {data.databaseInfo.hiddenFiles.length > 0 ? <HiddenFiles /> : null}
                     <SearchCard />
                     <Online>
                       <FeedbackCard />
@@ -537,14 +537,13 @@ function ChartWrapper({
   setHoveredObject: (obj: GitObject | null) => void
 }) {
   const chartWrapperRef = useRef<HTMLDivElement>(null)
-  const bodyRef = useRef<HTMLElement>(document.body)
-  const mouse = useMouse(bodyRef)
+  const mouse = useMouse()
 
   return (
     <div className="card grid overflow-y-hidden p-2" ref={chartWrapperRef}>
       <Chart setHoveredObject={setHoveredObject} />
       {createPortal(
-        <Tooltip hoveredObject={hoveredObject} x={mouse.docX} y={mouse.docY} w={window.innerWidth} />,
+        <Tooltip hoveredObject={hoveredObject} x={mouse.x} y={mouse.y} w={window.innerWidth} />,
         document.body
       )}
     </div>

@@ -1,15 +1,15 @@
 /* eslint-disable no-case-declarations */
+import { mdiFolder, mdiMenuRight } from "@mdi/js"
+import Icon from "@mdi/react"
 import { Fragment, memo, useMemo, useRef } from "react"
 import type { GitBlobObject, GitObject } from "~/analyzer/model"
+import { useData } from "~/contexts/DataContext"
+import type { DatabaseInfo } from "~/routes/$repo.$"
 import { useMetrics } from "../contexts/MetricContext"
 import { useOptions } from "../contexts/OptionsContext"
 import type { MetricType } from "../metrics/metrics"
 import { allExceptFirst, dateFormatRelative, isBlob } from "../util"
 import { LegendDot } from "./util"
-import { mdiFolder, mdiMenuRight } from "@mdi/js"
-import Icon from "@mdi/react"
-import { useData } from "~/contexts/DataContext"
-import type { DatabaseInfo } from "~/routes/$repo.$"
 
 interface TooltipProps {
   hoveredObject: GitObject | null

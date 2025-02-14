@@ -1,13 +1,13 @@
 import { useTransition, useState, useRef, useEffect } from "react"
-import { useNavigation, useSubmit } from "@remix-run/react"
+import { useNavigation, useSubmit } from "react-router";
 import { useData } from "~/contexts/DataContext"
 import { getPathFromRepoAndHead } from "~/util"
 import { CloseButton, LegendDot, CheckboxWithLabel } from "~/components/util"
 import { useMetrics } from "~/contexts/MetricContext"
-import { useKey } from "react-use"
-import { Icon } from "@mdi/react"
+import Icon from "@mdi/react"
 import { mdiArrowUp, mdiAccountMultiple } from "@mdi/js"
 import { createPortal } from "react-dom"
+import { useKey } from "~/hooks"
 
 export function UnionAuthorsModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { repo, databaseInfo } = useData()
@@ -191,7 +191,7 @@ export function UnionAuthorsModal({ open, onClose }: { open: boolean; onClose: (
       aria-modal
       className="z-10 m-auto flex h-full w-full flex-col items-start justify-stretch bg-transparent text-inherit backdrop:bg-gray-500/75 backdrop:p-0"
     >
-      <div className="card m-auto grid h-full w-full max-w-screen-2xl grow grid-cols-[1fr,1fr] grid-rows-[max-content_max-content_max-content_1fr_max-content] gap-2 overflow-hidden shadow">
+      <div className="card m-auto grid h-full w-full max-w-(--breakpoint-2xl) grow grid-cols-[1fr_1fr] grid-rows-[max-content_max-content_max-content_1fr_max-content] gap-2 overflow-hidden shadow-sm">
         <h2 className="text-2xl">Group authors</h2>
         <CloseButton absolute={false} className="justify-self-end" onClick={onClose} />
 
@@ -222,7 +222,7 @@ export function UnionAuthorsModal({ open, onClose }: { open: boolean; onClose: (
         </div>
 
         <div className="overflow-y-auto">
-          <div className="flex h-min min-h-0 flex-col gap-2 rounded-md bg-white p-4 pt-2 shadow dark:bg-gray-700">
+          <div className="flex h-min min-h-0 flex-col gap-2 rounded-md bg-white p-4 pt-2 shadow-sm dark:bg-gray-700">
             <div className="sticky top-0 flex gap-2 bg-inherit pt-2">
               <input
                 className="input min-w-0"
@@ -234,7 +234,7 @@ export function UnionAuthorsModal({ open, onClose }: { open: boolean; onClose: (
               <button
                 disabled={disabled || selectedAuthors.length === 0}
                 onClick={() => setSelectedAuthors([])}
-                className="btn btn--outlined w-max flex-grow"
+                className="btn btn--outlined w-max grow"
                 title="Clear selection"
               >
                 Clear
@@ -246,7 +246,7 @@ export function UnionAuthorsModal({ open, onClose }: { open: boolean; onClose: (
                     ? setSelectedAuthors([])
                     : setSelectedAuthors((selected) => Array.from(new Set([...selected, ...ungroupedAuthorsFiltered])))
                 }
-                className="btn btn--outlined w-max flex-grow"
+                className="btn btn--outlined w-max grow"
                 title="Clear selection"
               >
                 {selectedAuthors.length === ungroupedAuthorsFiltered.length ? "Deselect all" : "Select all"}
@@ -262,7 +262,7 @@ export function UnionAuthorsModal({ open, onClose }: { open: boolean; onClose: (
           </div>
         </div>
         <div className="overflow-y-auto">
-          <div className="grid h-min min-h-0 grid-cols-1 gap-4 rounded-md bg-white p-4 shadow lg:grid-cols-2 xl:grid-cols-3  dark:bg-gray-700">
+          <div className="grid h-min min-h-0 grid-cols-1 gap-4 rounded-md bg-white p-4 shadow-sm lg:grid-cols-2 xl:grid-cols-3 dark:bg-gray-700">
             {authorUnions.length > 0 ? (
               groupedAuthorsEntries
             ) : (

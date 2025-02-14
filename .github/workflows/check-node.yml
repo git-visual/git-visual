@@ -14,7 +14,8 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [22.x, 20.x, 18.x]
+        node-version: [22.x]
+        # node-version: [22.x, 20.x, 18.x]
 
     steps:
       - uses: actions/checkout@v2
@@ -27,7 +28,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Install dependencies
-        run: npm install
+        run: rm package-lock.json && npm install
 
       - name: Run unit tests
         run: npm run test:unit

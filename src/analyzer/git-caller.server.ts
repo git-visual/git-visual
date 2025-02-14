@@ -62,7 +62,7 @@ export class GitCaller {
     // Find file containing the branch head
 
     const branchHead = await GitCaller._revParse(gitFolder, branch)
-    log.debug(`${branch} -> [commit]${branchHead}`)
+    log.debug(`${branch} -> [commit] ${branchHead}`)
 
     return [branchHead, branch]
   }

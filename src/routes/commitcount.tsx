@@ -1,8 +1,8 @@
-import type { LoaderFunctionArgs } from "@remix-run/node"
 import invariant from "tiny-invariant"
 import InstanceManager from "~/analyzer/InstanceManager.server"
+import type { Route } from "./+types/commitcount"
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+export const loader = async ({ request }: Route.LoaderArgs) => {
   const url = new URL(request.url)
   const branch = url.searchParams.get("branch")
   const repo = url.searchParams.get("repo")

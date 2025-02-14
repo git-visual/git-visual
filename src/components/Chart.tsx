@@ -1,6 +1,7 @@
 import type { HierarchyCircularNode, HierarchyNode, HierarchyRectangularNode } from "d3-hierarchy"
 import { hierarchy, pack, treemap, treemapResquarify } from "d3-hierarchy"
 import type { MouseEventHandler } from "react"
+import type { JSX } from "react"
 import { useDeferredValue, memo, useEffect, useMemo } from "react"
 import type { GitBlobObject, GitObject, GitTreeObject } from "~/analyzer/model"
 import { useClickedObject } from "~/contexts/ClickedContext"

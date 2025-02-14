@@ -1,17 +1,18 @@
 # [Development](#development)
 
-After you've cloned the project locally (and fulfilled prerequisites), the first thing you need to do is install the development dependencies with `npm install` _or using yarn:_ `yarn`.
+After you've cloned the project locally (and fulfilled prerequisites), the first thing you need to do is install the development dependencies with `npm install`.
 
 This project is split up into two parts:
 
 - A CLI interface for launching the application
 - A fullstack application
 
-To run the fullstack application by itself, you can run `npm run dev` _or using yarn:_ `yarn dev`. This will startup the Remix Dev Server, which supports Hot Module Reloading, meaning app state is preserved between rebuilds. This is not how the end user uses the application and does not support arguments. To test your local version of the CLI, you should instead install it globally by running `npm install -g .` in the root of the repo. Now, when you run `git-truck` in a git repository to test, it is symlinked and use your local development version.
-**Note:** Remember to build the project when making changes, so your changes are reflected. This can be done automatically by running `npm run watch` in a separate terminal, which will automatically build the project when changes are made.
-**Note:** This will not rebuild the CLI, so you will need to run `npm run build` or `npm run build-cli` when making changes to the CLI.
+To run the fullstack application by itself, you can run `npm run dev`. This will startup the React Router Dev Server, which supports Hot Module Reloading, meaning app state is preserved between rebuilds. This is not how the end user uses the application and does not support arguments. To test your local version of the CLI, you should instead install it globally by running `npm install -g .` in the root of the repo. Now, when you run `git-truck` in a git repository to test, it is symlinked and use your local development version.
+**Note:** When testing the production build, remember to build the project with `npm run build` when making changes, so your changes are reflected.
 
-For arguments, see [Arguments](README.md#arguments).
+<!-- TODO: Make sure it is possible to change log levels -->
+
+For changing the log levels ???
 
 ## Commits
 
@@ -34,20 +35,22 @@ To enforce this automatically, you can use tools such as [Commitizen](https://gi
 
 # Publish
 
-To publish production ready versions, execute the [build and publish workflow](https://github.com/git-truck/git-truck/actions/workflows/bump-version-and-publish.yml)
+Production ready versions are automatically published when succesfully merging a pull request. This is taken care of by the [build and publish workflow](https://github.com/git-truck/git-truck/actions/workflows/bump-version-and-publish.yml)
 The version will automatically be bumped, according to the rules described in the [commits section](README.md#commits)
 
 This means that if any commits include the corresponding words, the version will be bumped accordingly.
 
 ## Prerelease and Experimental releases
 
-To publish experimental releases, run
+To publish experimental releases, you need to be signed into NPM and have two-factor authentication setup for your account.
+
+Run the following command to publish an experimental release:
 
 ```
 npm run pub-exp -- <OTP>
 ```
 
-With a One Time Password from your authenticator app.
+Where OTP is a One Time Password from your authenticator app.
 
 To publish prerelease versions, run
 

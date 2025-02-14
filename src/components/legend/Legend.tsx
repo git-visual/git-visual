@@ -1,13 +1,13 @@
+import { useDeferredValue, type JSX } from "react"
+import type { GitObject } from "~/analyzer/model"
 import { useMetrics } from "../../contexts/MetricContext"
 import { useOptions } from "../../contexts/OptionsContext"
 import type { MetricCache } from "../../metrics/metrics"
 import { getMetricDescription, getMetricLegendType, Metric } from "../../metrics/metrics"
+import { AuthorOptions } from "../AuthorOptions"
+import { GradientLegend } from "./GradiantLegend"
 import { PointLegend } from "./PointLegend"
 import { SegmentLegend } from "./SegmentLegend"
-import { GradientLegend } from "./GradiantLegend"
-import type { GitObject } from "~/analyzer/model"
-import { useDeferredValue } from "react"
-import { AuthorOptions } from "../AuthorOptions"
 
 export type LegendType = "POINT" | "GRADIENT" | "SEGMENTS"
 
@@ -42,7 +42,7 @@ export function Legend({
   }
 
   return (
-    <div className={`card flex-shrink-0 overflow-hidden ${className}`}>
+    <div className={`card shrink-0 overflow-hidden ${className}`}>
       <h2 className="card__title">Legend: {Metric[metricType]}</h2>
       <p className="card-p">{getMetricDescription(metricType)}</p>
       {metricType === "TOP_CONTRIBUTOR" ? <AuthorOptions showUnionAuthorsModal={showUnionAuthorsModal} /> : null}

@@ -1,6 +1,6 @@
 import yargsParser from "yargs-parser"
-import type { ArgsOptions } from "./model"
 import { GitCaller } from "./git-caller.server"
+import type { ArgsOptions } from "./model"
 import { getBaseDirFromPath } from "./util.server"
 
 export function parseArgs(rawArgs: string[] = process.argv.slice(2)) {

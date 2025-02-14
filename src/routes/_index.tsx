@@ -1,5 +1,4 @@
-import { ActionFunctionArgs, defer, type SerializeFrom } from "@remix-run/node"
-import { Await, Form, Link, useFetcher, useLoaderData } from "@remix-run/react"
+import { Await, Form, Link, useFetcher, useLoaderData } from "react-router"
 import { getArgsWithDefaults } from "~/analyzer/args.server"
 import { Code } from "~/components/util"
 import { LoadingIndicator } from "~/components/LoadingIndicator"
@@ -12,13 +11,13 @@ import { RevisionSelect } from "~/components/RevisionSelect"
 import gitTruckLogo from "~/assets/truck.png"
 import { cn } from "~/styling"
 import { join, resolve } from "node:path"
-import { getBaseDirFromPath, getDirName } from "~/analyzer/util.server"
+import { getBaseDirFromPath, getDirName, readGitRepos } from "~/analyzer/util.server"
 import Icon from "@mdi/react"
 import { mdiArrowUp, mdiDeleteForever, mdiFolder, mdiGit, mdiTruckAlert } from "@mdi/js"
 import InstanceManager from "~/analyzer/InstanceManager.server"
 import { existsSync } from "node:fs"
-import { readdir } from "node:fs/promises"
 import { log } from "~/analyzer/log.server"
+import type { Route } from "./+types/_index"
 
 export const loader = async () => {
   const queryPath = null
@@ -42,45 +41,28 @@ export const loader = async () => {
     // args.path
   )
 
-  const entries = await readdir(baseDir, { withFileTypes: true })
-
   // Get all directories that has a .git subdirectory
-  const repositories = entries
-    .filter(
-      (entry) =>
-        entry.isDirectory() &&
-        existsSync(join(baseDir, entry.name)) &&
-        !entry.name.startsWith(".") &&
-        // TODO: Implement browsing, requires new routing
-        existsSync(join(baseDir, entry.name, ".git"))
-    )
-    .map(({ name }) => name)
+  const repositories: Repository[] = await readGitRepos(baseDir)
 
   // Get metadata for all repos in parallel
   // Returns an object, as `defer` does not support arrays
   // The keys are prefixed with an underscore to avoid conflicts with other properties returned from the loader
   const repositoryPromises = Object.fromEntries(
-    repositories.map((repo) => [`_${repo}`, GitCaller.getRepoMetadata(join(baseDir, repo))])
+    repositories.map((repo) => [`_${repo.path}`, GitCaller.getRepoMetadata(join(baseDir, repo.name))])
   )
 
   const analyzedReposPromise = InstanceManager.getOrCreateMetadataDB().getCompletedRepos()
 
-  return defer<{
-    repositories: string[]
-    baseDir: string
-    baseDirName: string
-    analyzedReposPromise: Promise<CompletedResult[]>
-    [key: string]: string | string[] | Promise<CompletedResult[]> | Repository
-  }>({
+  return {
     repositories,
     baseDir,
     baseDirName: getDirName(baseDir),
     analyzedReposPromise,
-    ...repositoryPromises
-  })
+    repositoryPromises
+  }
 }
 
-export const action = async ({ request }: ActionFunctionArgs) => {
+export const action = async ({ request }: Route.ActionArgs) => {
   const baseDir = new URL(request.url).searchParams.get("path")
 
   log.info(`Checking path: ${baseDir}`)
@@ -108,7 +90,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 }
 
 export default function Index() {
-  const { repositories, baseDir, analyzedReposPromise, ...repositoryPromises } = useLoaderData<typeof loader>()
+  const { repositories, baseDir, analyzedReposPromise, repositoryPromises } = useLoaderData<typeof loader>()
   const castedRepositoryPromises = repositoryPromises as unknown as Record<string, Promise<Repository | null>>
   const fetcher = useFetcher<typeof action>()
 
@@ -174,15 +156,13 @@ export default function Index() {
           <div className="opacity-80">Folder</div>
           <div className="opacity-80">Status</div>
           <div className="col-span-2 opacity-80">Actions</div>
-          {repositories.map((repoDir, i) => (
+          {repositories.map((repo, i) => (
             <Suspense
-              key={repositories[i]}
+              key={repositories[i].path}
               fallback={
                 <RepositoryEntry
                   repo={{
-                    name: repoDir,
-                    path: repoDir,
-                    fullPath: join(baseDir, repoDir),
+                    ...repo,
                     parentDirPath: baseDir,
                     status: "Loading"
                   }}
@@ -190,9 +170,9 @@ export default function Index() {
                 />
               }
             >
-              <Await resolve={Promise.all([castedRepositoryPromises[`_${repoDir}`], analyzedReposPromise] as const)}>
+              <Await resolve={Promise.all([castedRepositoryPromises[`_${repo.path}`], analyzedReposPromise] as const)}>
                 {([repo, analyzedRepos]) =>
-                  repo !== null ? <RepositoryEntry key={repo.name} repo={repo} analyzedRepos={analyzedRepos} /> : null
+                  repo !== null ? <RepositoryEntry key={repo.path} repo={repo} analyzedRepos={analyzedRepos} /> : null
                 }
               </Await>
             </Suspense>
@@ -215,11 +195,11 @@ function RepositoryList({ children }: { children: ReactNode[] }) {
       </p>
     </>
   ) : (
-    <div className="card row-start-auto grid w-full grid-flow-row grid-cols-[1fr,1fr,1fr,auto] flex-wrap items-center gap-2">
+    <div className="card row-start-auto grid w-full grid-flow-row grid-cols-[1fr_1fr_1fr_auto] flex-wrap items-center gap-2">
       {/* <h2 className="card__title truncate break-all" title="Clone repository">
         Clone repository
       </h2>
-      <span className="select-none rounded-full bg-gradient-to-r  from-blue-500 to-blue-600 px-2 py-1.5 text-center text-xs font-bold uppercase leading-none tracking-widest text-white/90">
+      <span className="select-none rounded-full bg-linear-to-r  from-blue-500 to-blue-600 px-2 py-1.5 text-center text-xs font-bold uppercase leading-none tracking-widest text-white/90">
         Coming soon
       </span>
       <input type="text" className="input input--hover-border" placeholder="git@github.com/owner/repo.git" />
@@ -233,13 +213,7 @@ function RepositoryList({ children }: { children: ReactNode[] }) {
   )
 }
 
-function RepositoryEntry({
-  repo,
-  analyzedRepos
-}: {
-  repo: SerializeFrom<Repository>
-  analyzedRepos: CompletedResult[]
-}): ReactNode {
+function RepositoryEntry({ repo, analyzedRepos }: { repo: Repository; analyzedRepos: CompletedResult[] }): ReactNode {
   const isSuccesful = repo.status === "Success"
   const isError = repo.status === "Error"
 
@@ -251,13 +225,13 @@ function RepositoryEntry({
 
   return (
     <Fragment key={repo.name}>
-      <h2 className="card__title flex justify-start gap-2" title={join(repo.parentDirPath, repo.name)}>
+      <h2 className="card__title flex justify-start gap-2" title={repo.path}>
         {!isError ? (
-          <Icon path={mdiGit} size={1} className="inline-block flex-shrink-0" title="Git repository" />
+          <Icon path={mdiGit} size={1} className="inline-block shrink-0" title="Git repository" />
         ) : isFolder ? (
-          <Icon path={mdiFolder} size={1} className="inline-block flex-shrink-0" title="Folder" />
+          <Icon path={mdiFolder} size={1} className="inline-block shrink-0" title="Folder" />
         ) : (
-          <Icon path={mdiTruckAlert} size={1} className="inline-block flex-shrink-0" title="Error" />
+          <Icon path={mdiTruckAlert} size={1} className="inline-block shrink-0" title="Error" />
         )}
         <span className="truncate text-left">{repo.name}</span>
       </h2>
@@ -267,10 +241,10 @@ function RepositoryEntry({
         ) : (
           <div
             className={cn("aspect-square h-2 rounded-full", {
-              "bg-gradient-to-bl from-green-500 to-green-600": repo.status === "Success" && isAnalyzed,
-              "bg-gradient-to-bl from-red-500 to-red-600": repo.status === "Error",
-              "animate-pulse bg-gradient-to-bl from-yellow-500 to-yellow-600": repo.status === "Loading",
-              "bg-gradient-to-bl from-gray-500 to-gray-400": repo.status === "Success" && !isAnalyzed
+              "bg-linear-to-bl from-green-500 to-green-600": repo.status === "Success" && isAnalyzed,
+              "bg-linear-to-bl from-red-500 to-red-600": repo.status === "Error",
+              "animate-pulse bg-linear-to-bl from-yellow-500 to-yellow-600": repo.status === "Loading",
+              "bg-linear-to-bl from-gray-500 to-gray-400": repo.status === "Success" && !isAnalyzed
             })}
           />
         )}
@@ -280,7 +254,7 @@ function RepositoryEntry({
           <span
             data-testid={`status-${repo.name}`}
             className={cn(
-              "w-full min-w-max select-none rounded-full bg-transparent px-2 py-1.5 text-xs font-bold uppercase leading-none tracking-widest text-inherit transition-colors duration-200"
+              "w-full min-w-max rounded-full bg-transparent px-2 py-1.5 text-xs leading-none font-bold tracking-widest text-inherit uppercase transition-colors duration-200 select-none"
             )}
           >
             {repo.status === "Success" ? (isAnalyzed ? "Analyzed" : "Not analyzed") : repo.status}
@@ -326,14 +300,14 @@ function RepositoryEntry({
           className="btn btn--primary btn--outlined transition-colors"
           title={`View ${repo.name}`}
           aria-disabled={repo.status === "Error" || repo.status === "Loading"}
-          // to={`/repo/?${new URLSearchParams({ path: repo.fullPath ?? "", branch: head ?? "" }).toString()}`}
+          // to={`/repo/?${new URLSearchParams({ path: repo.path ?? "", branch: head ?? "" }).toString()}`}
           to={path ?? ""}
           prefetch="none"
         >
           View
         </Link>
       )}
-      <hr className="col-span-full last:hidden" />
+      <hr className="col-span-full opacity-50 last:hidden" />
     </Fragment>
   )
 }

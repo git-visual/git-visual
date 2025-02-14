@@ -3,17 +3,14 @@
 import express from "express"
 import compression from "compression"
 import morgan from "morgan"
-import { createRequestHandler } from "@remix-run/express"
-import path from "path"
+import { createRequestHandler } from "@react-router/express"
 import pkg from "../package.json"
 import open from "open"
-import latestVersion from "latest-version"
 import { GitCaller } from "./analyzer/git-caller.server"
 import { getArgsWithDefaults, parseArgs } from "./analyzer/args.server"
-import { semverCompare, getPathFromRepoAndHead } from "./util"
-import { describeAsyncJob, getDirName, isValidURI } from "./analyzer/util.server"
+import { getPathFromRepoAndHead } from "./util"
+import { describeAsyncJob, getDirName, getLatestVersion, isValidURI } from "./analyzer/util.server"
 import { log, setLogLevel } from "./analyzer/log.server"
-import type { NextFunction } from "express-serve-static-core"
 import InstanceManager from "./analyzer/InstanceManager.server"
 
 async function main() {
@@ -23,41 +20,15 @@ async function main() {
   }
   const options = getArgsWithDefaults()
 
-  const currentV = pkg.version
-  let updateMessage = ""
-  try {
-    const latestV = await latestVersion(pkg.name)
+  // Soft clear the console
+  process.stdout.write("\u001b[2J\u001b[0;0H")
+  console.log()
 
-    // Soft clear the console
-    process.stdout.write("\u001b[2J\u001b[0;0H")
-    console.log()
-
-    updateMessage =
-      latestV && semverCompare(latestV, currentV) === 1
-        ? ` [!] Update available: ${latestV}
-
-To update, run:
-
-npx git-truck@latest
-
-Or to install globally:
-
-npm install -g git-truck@latest
-
-`
-        : " (latest)"
-  } catch (e) {
-    // ignore
-  }
-  console.log(`Git Truck version ${currentV}${updateMessage}\n`)
+  console.log(`Git Truck version ${pkg.version} (${process.env.NODE_ENV ?? "development"})`)
 
   if (args.h || args.help) {
     console.log()
-    console.log(`See
-
-${pkg.homepage}
-
-for usage instructions.`)
+    console.log(`See ${pkg.homepage} for usage instructions.`)
     console.log()
     process.exit(0)
   }
@@ -89,86 +60,106 @@ for usage instructions.`)
     })
 
     if (extensionError) {
-      console.error(extensionError)
+      log.error(extensionError)
     }
 
-    if (process.env.NODE_ENV !== "development") {
-      const openURL = url + (extension && isValidURI(extension) ? extension : "")
+    if (!args.headless && process.env.NODE_ENV === "development") {
+      args.headless = true
+    }
+    const openURL = url + (extension && isValidURI(extension) ? extension : "")
 
-      if (!args.headless) {
-        log.debug(`Opening ${openURL}`)
-        await describeAsyncJob({
-          job: () => open(openURL),
-          beforeMsg: "Opening Git Truck in your browser",
-          afterMsg: "Opened Git Truck in your browser",
-          errorMsg: `Failed to open Git Truck in your browser. To continue, open this link manually:\n\n${openURL}\n`
-        })
-      } else {
-        console.log(`Application available at ${url}`)
-      }
+    if (!args.headless) {
+      log.debug(`Opening ${openURL}`)
+      await describeAsyncJob({
+        job: () => open(openURL),
+        beforeMsg: "Opening Git Truck in your browser",
+        afterMsg: "Opened Git Truck in your browser",
+        errorMsg: `Failed to open Git Truck in your browser. To continue, open this link manually:\n\n${openURL}\n`
+      })
+    } else {
+      console.log(`Application available at ${url}`)
     }
   }
 
-  describeAsyncJob({
-    job: async () => {
-      const app = createApp(
-        "./build/index.js",
-        process.env.NODE_ENV ?? "production",
-        "/build",
-        path.join(__dirname, "public", "build")
-      )
+  const viteDevServer =
+    process.env.NODE_ENV === "production"
+      ? undefined
+      : await import("vite").then((vite) =>
+          vite.createServer({
+            server: { middlewareMode: true }
+          })
+        )
 
-      const server = process.env.HOST ? app.listen(port, process.env.HOST, onListen) : app.listen(port, onListen)
-      ;["SIGTERM", "SIGINT"].forEach((signal) => {
-        process.once(signal, () => server?.close(console.error))
-        process.once(signal, async () => await InstanceManager.closeAllDBConnections())
-      })
-    },
-    beforeMsg: "Starting app",
-    afterMsg: "App started",
-    errorMsg: "Failed to start app"
+  const latestVersion = await getLatestVersion()
+
+  const reactRouterHandler = createRequestHandler({
+    build: viteDevServer
+      ? () => viteDevServer.ssrLoadModule("virtual:react-router/server-build")
+      : await import("../build/server/index.js"),
+    getLoadContext() {
+      return {
+        version: pkg.version,
+        latestVersion: latestVersion
+      }
+    }
   })
+
+  const app = express()
+
+  app.use(compression())
+
+  // http://expressjs.com/en/advanced/best-practice-security.html#at-a-minimum-disable-x-powered-by-header
+  app.disable("x-powered-by")
+
+  // handle asset requests
+  if (viteDevServer) {
+    app.use(viteDevServer.middlewares)
+  } else {
+    // Vite fingerprints its assets so we can cache forever.
+    app.use(
+      "/assets",
+      express.static("build/client/assets", {
+        immutable: true,
+        maxAge: "1y",
+        setHeaders(res, path, stat) {
+          console.log("checking file extension")
+          if (path.endsWith(".js")) {
+            console.log("setting js header")
+            res.setHeader("Content-Type", "application/javascript; charset=utf-8")
+          }
+        }
+      })
+    )
+  }
+
+  // Everything else (like favicon.ico) is cached for an hour. You may want to be
+  // more aggressive with this caching.
+  app.use(express.static("build/client", { maxAge: "1h" }))
+
+  app.use(morgan("tiny"))
+
+  // handle SSR requests
+  app.all("*", reactRouterHandler)
+
+  const server = process.env.HOST ? app.listen(port, process.env.HOST, onListen) : app.listen(port, onListen)
+  ;["SIGTERM", "SIGINT"].forEach((signal) => {
+    process.once(signal, stopHandler)
+  })
+
+  process.on("uncaughtException", stopHandler)
+
+  async function stopHandler() {
+    const promise = InstanceManager.closeAllDBConnections()
+    log.info("Shutting down server")
+    server.close(console.error)
+    log.info("Web server shut down")
+    await describeAsyncJob({
+      job: () => promise,
+      beforeMsg: "Stopping Git Truck...",
+      afterMsg: "Successfully stopped Git Truck",
+      errorMsg: "Failed to stop Git Truck"
+    })
+  }
 }
 
 main()
-
-function createApp(
-  buildPath: string,
-  mode = "production",
-  publicPath = "/build/",
-  assetsBuildDirectory = "public/build/"
-) {
-  const app = express()
-
-  app.disable("x-powered-by")
-
-  // @ts-expect-error This error is wrong, the types are incorrect
-  app.use(compression())
-
-  // @ts-expect-error This error is wrong, the types are incorrect
-  app.use(publicPath, express.static(assetsBuildDirectory, { immutable: true, maxAge: "1y" }))
-
-  // @ts-expect-error This error is wrong, the types are incorrect
-  app.use(express.static("public", { maxAge: "1h" }))
-
-  if (mode === "development") {
-    // @ts-expect-error This error is wrong, the types are incorrect
-    app.use(morgan("dev"))
-  }
-
-  let requestHandler: ReturnType<typeof createRequestHandler> | undefined
-  app.all("*", async (req, res, next) => {
-    try {
-      if (!requestHandler) {
-        const build = await import(buildPath)
-        requestHandler = createRequestHandler({ build, mode })
-      }
-
-      return await requestHandler(req, res, next as NextFunction)
-    } catch (error) {
-      next?.(error)
-    }
-  })
-
-  return app
-}

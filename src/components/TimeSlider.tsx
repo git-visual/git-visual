@@ -1,4 +1,4 @@
-import { useSubmit, useNavigation } from "@remix-run/react"
+import { useSubmit, useNavigation } from "react-router";
 import { useMemo, useState } from "react"
 import { Slider, Rail, Handles, Tracks } from "react-compound-slider"
 import { useData } from "~/contexts/DataContext"
